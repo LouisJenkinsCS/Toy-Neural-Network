@@ -39,6 +39,10 @@ print("Expected Answer: ", codomain)
 for i in range(iterations):
     # forward propagation
     layer0 = domain
+    # Perform dot product to adjust the input so that the sigmoid function will
+    # produce variable results. I.E If the weight of neuron 'n' is 0, then
+    # sigmoid(0) = 0.5; the weight will adjust so that the sigmoid value will
+    # become appropriate.
     layer1 = sigmoid(num.dot(layer0, weights))
     if (i == 0):
         print("Initial Guess: ", layer1)
@@ -58,3 +62,11 @@ for i in range(iterations):
     weights += num.dot(domain.T, layerDelta1)
 
     # print(weights)
+
+# forward propagation
+layer0 = num.array([[1, 1, 1]])
+layer1 = sigmoid(num.dot(layer0, weights))
+# Find error
+layerError1 = num.array([[1]]) - layer1
+
+print(layerError1)
