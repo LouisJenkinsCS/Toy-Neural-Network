@@ -1,6 +1,7 @@
 import numpy as num
 
-iterations = 10000
+iterations = 1000
+hiddenNeurons = 10
 
 
 # Activation function
@@ -33,7 +34,8 @@ num.random.seed(1)
 # The weights determine how likely the synapses are going to fire,
 # and so the heavier the weight the more likely; this will be changed
 # during back propagation corrections.
-weights = 2 * num.random.random((3, 1)) - 1
+weights = 2 * num.random.random((3, hiddenNeurons)) - 1
+hiddenWeights = 2 * num.random.random((hiddenNeurons, 1)) - 1
 print("Expected Answer: ", codomain)
 
 for i in range(iterations):
@@ -44,29 +46,34 @@ for i in range(iterations):
     # sigmoid(0) = 0.5; the weight will adjust so that the sigmoid value will
     # become appropriate.
     layer1 = sigmoid(num.dot(layer0, weights))
+    layer2 = sigmoid(num.dot(layer1, hiddenWeights))
     if (i == 0):
-        print("Initial Guess: ", layer1)
+        print("Initial Guess: ", layer1, layer2)
     elif (i == iterations-1):
-        print("Final Guess: ", layer1)
+        print("Final Guess: ", layer1, layer2)
 
     # Find error
-    layerError1 = codomain - layer1
+    layerError2 = codomain - layer2
 
     # We adjust based on how correct and how 'sure' the machine was;
     # if the machine was sure (~1) but was incorrect, it will adjust
     # a lot more than if it was unsure (~0). If it was correct, then
     # there would be no change (error would be 0).
+    layerDelta2 = layerError2 * slope(layer2)
+
+    layerError1 = num.dot(layerDelta2, hiddenWeights.T)
     layerDelta1 = layerError1 * slope(layer1)
 
     # Update the synaptic weights
-    weights += num.dot(domain.T, layerDelta1)
-
+    hiddenWeights += num.dot(layer1.T, layerDelta2)
+    weights += num.dot(layer0.T, layerDelta1)
     # print(weights)
 
 # forward propagation
 layer0 = num.array([[1, 1, 1]])
 layer1 = sigmoid(num.dot(layer0, weights))
+layer2 = sigmoid(num.dot(layer1, hiddenWeights))
 # Find error
-layerError1 = num.array([[1]]) - layer1
+layerError2 = num.array([[1]]) - layer2
 
-print(layerError1)
+print("Percent Error: {0:.0f}%".format(layerError2[0][0] * 100))
