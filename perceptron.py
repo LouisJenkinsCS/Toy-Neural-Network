@@ -1,3 +1,7 @@
+# A simple multi-layer perceptron
+# TODO: Convert into an interesting abstraction that lets users
+# specifies the number of hidden layers, neurons, iterations, and so forth
+
 import numpy as num
 
 iterations = 1000
