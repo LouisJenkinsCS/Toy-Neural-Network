@@ -1,16 +1,16 @@
 # A simple multi-layer perceptron
-# TODO: Convert into an interesting abstraction that lets users
-# specifies the number of hidden layers, neurons, iterations, and so forth
 
 import numpy as num
+import scipy.special
+import reader
 
-iterations = 1000
-hiddenNeurons = 10
+iterations = 5
+hiddenNeurons = 100
 
 
 # Activation function
 def sigmoid(x):
-    return 1 / (1 + num.exp(-x))
+    return 1 / (1 + scipy.special.expit(-x))
 
 
 # Slope for activation function
@@ -19,17 +19,16 @@ def slope(x):
 
 
 # The domain is our list of inputs; each input consists of 3 integers
-domain = num.array([
-    [0, 0, 1],
-    [0, 1, 1],
-    [1, 0, 1],
-    [1, 1, 1]
-])
+domain = reader.readImages()
+
 # The codomain is our list of outputs; each output is index-mapped
 # to its input, so domain[i] has output codomain[i]
-codomain = num.array([
-    [0], [0], [1], [1]
-])
+codomain = []
+for label in reader.readLabels():
+    arr = num.zeros(9)
+    arr[label - 1] = 1
+    codomain.append(arr)
+codomain = num.array(codomain)
 
 # Deterministic Seed
 num.random.seed(1)
@@ -38,9 +37,8 @@ num.random.seed(1)
 # The weights determine how likely the synapses are going to fire,
 # and so the heavier the weight the more likely; this will be changed
 # during back propagation corrections.
-weights = 2 * num.random.random((3, hiddenNeurons)) - 1
-hiddenWeights = 2 * num.random.random((hiddenNeurons, 1)) - 1
-print("Expected Answer: ", codomain)
+weights = 2 * num.random.random((domain.shape[-1], hiddenNeurons)) - 1
+hiddenWeights = 2 * num.random.random((hiddenNeurons, codomain.shape[-1])) - 1
 
 for i in range(iterations):
     # forward propagation
@@ -51,10 +49,6 @@ for i in range(iterations):
     # become appropriate.
     layer1 = sigmoid(num.dot(layer0, weights))
     layer2 = sigmoid(num.dot(layer1, hiddenWeights))
-    if (i == 0):
-        print("Initial Guess: ", layer1, layer2)
-    elif (i == iterations-1):
-        print("Final Guess: ", layer1, layer2)
 
     # Find error
     layerError2 = codomain - layer2
@@ -67,17 +61,22 @@ for i in range(iterations):
 
     layerError1 = num.dot(layerDelta2, hiddenWeights.T)
     layerDelta1 = layerError1 * slope(layer1)
+    print(num.average(layerError1) * num.average(slope(layer1)))
+    print("Delta1=", num.average(layerDelta1), ", Delta2=", num.average(layerDelta2))
 
     # Update the synaptic weights
     hiddenWeights += num.dot(layer1.T, layerDelta2)
+    print(hiddenWeights)
     weights += num.dot(layer0.T, layerDelta1)
-    # print(weights)
 
-# forward propagation
-layer0 = num.array([[1, 1, 1]])
-layer1 = sigmoid(num.dot(layer0, weights))
-layer2 = sigmoid(num.dot(layer1, hiddenWeights))
-# Find error
-layerError2 = num.array([[1]]) - layer2
-
-print("Percent Error: {0:.0f}%".format(layerError2[0][0] * 100))
+    # Debug Print
+    if (i == 0):
+        print("[Initial] Layer1 Error (Avg): {0:.0f}%"
+              .format(num.average(layerError1) * 100))
+        print("[Initial] Layer2 Error (Avg): {0:.0f}%"
+              .format(num.average(layerError2) * 100))
+    elif (i == iterations-1):
+        print("[Final] Layer1 Error (Avg): {0:.0f}%"
+              .format(num.average(layerError1) * 100))
+        print("[Final] Layer2 Error (Avg): {0:.0f}%"
+              .format(num.average(layerError2) * 100))

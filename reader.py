@@ -28,6 +28,8 @@ def readImages():
         arr = numpy.moveaxis(arr, [0, 1, 2], [1, 0, 2])
         arr = numpy.reshape(arr, (arr.shape[0], arr.shape[1], arr.shape[2]))
         arr = arr / float(255)
+        arr = arr.reshape(-1, arr.shape[-1])
+        arr = arr.reshape((arr.shape[1], arr.shape[0]))
         return arr
 
 
@@ -40,4 +42,4 @@ def readLabels():
         nLabels = readInt(f)
 
         # Read data
-        return [int(x) for x in bytearray(f.read())]
+        return numpy.array([int(x) for x in bytearray(f.read())])
