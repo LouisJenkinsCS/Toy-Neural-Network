@@ -66,7 +66,8 @@ for i in range(iterations):
 
     # Update the synaptic weights
     hiddenWeights += num.dot(layer1.T, layerDelta2)
-    print(hiddenWeights)
+    print(layer1.T[0][0] * layerDelta2[0][0] + layer1.T[0][1] * layerDelta2[1][0])
+    print(num.dot(layer1.T, layerDelta2)[0][0])
     weights += num.dot(layer0.T, layerDelta1)
 
     # Debug Print
